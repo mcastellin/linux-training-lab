@@ -1,0 +1,49 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+
+  # Workaround to avoid virtualbox captures microphone all the time
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--audio", "none"]
+  end
+
+  # Defines primary server to ssh into by default.
+  # When using the lab this is the main server to connect to perform administrative tasks
+  config.vm.define "server1", primary: true do |server1|
+    server1.vm.hostname = "server1"
+    server1.vm.network "private_network", ip: "10.0.1.10"
+
+    server1.vm.provision "shell", path: "scripts/install.sh",
+      privileged: true
+
+    server1.vm.provider "virtualbox" do |vb|
+      unless File.exist?("./disk2.vdi")
+        vb.customize ["storagectl", :id, "--name", "SCSI", "--add", "scsi"]
+      end
+      unless File.exist?("./disk2.vdi")
+        vb.customize ["createhd", "--filename", "./disk2.vdi", "--variant", "Fixed", "--size", 5 * 1024]
+      end
+      unless File.exist?("./disk3.vdi")
+        vb.customize ["createhd", "--filename", "./disk3.vdi", "--variant", "Fixed", "--size", 10 * 1024]
+      end
+
+      vb.memory = "1024"
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 1,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", "./disk2.vdi"]
+
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 2,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", "./disk3.vdi"]
+    end
+
+  end
+end
