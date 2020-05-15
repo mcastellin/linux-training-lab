@@ -7,6 +7,10 @@
 # you're doing.
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_guest = true
+  config.hostmanager.include_offline = true
+  config.hostmanager.ignore_private_ip = false
   
   # Workaround to avoid virtualbox captures microphone all the time
   config.vm.provider "virtualbox" do |vb|
@@ -15,7 +19,6 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "shell", path: "scripts/install.sh", privileged: true
-  config.vm.provision "shell", path: "scripts/hosts.sh", privileged: true
   
   # Defines the primary server to ssh into by defaul.
   # When using the lab, this is the main server to commet to perform administrative tasks
