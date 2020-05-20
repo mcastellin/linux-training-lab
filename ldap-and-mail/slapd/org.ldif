@@ -1,0 +1,17 @@
+dn: dc=ldap1,dc=local
+dc: ldap1
+objectClass: top
+objectClass: domain
+
+dn: cn=ldapad,dc=ldap1,dc=local
+objectClass: organizationalRole
+cn: ldapadm
+description: LDAP Manager
+
+dn: ou=People,dc=ldap1,dc=local
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=ldap1,dc=local
+objectClass: organizationalUnit
+ou: Group
