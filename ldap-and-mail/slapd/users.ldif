@@ -1,0 +1,23 @@
+dn: uid=user1,ou=People,dc=ldap1,dc=local
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user1
+uid: user1
+uidNumber: 5000
+gidNumber: 5000
+homeDirectory: /home/user1
+loginShell: /bin/bash
+
+dn: uid=user2,ou=People,dc=ldap1,dc=local
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user2
+uid: user2
+uidNumber: 5001
+gidNumber: 5001
+homeDirectory: /home/user2
+loginShell: /bin/bash

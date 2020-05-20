@@ -1,0 +1,22 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=ldap1,dc=local
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=ldapadm,dc=ldap1,dc=local
+
+# Password to be generated with slappasswd command and replaced
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootPW
+olcRootPW: {SSHA}39ss1DBJz8yQwWOoc2Uf+m7jX87y2zAg
+
+# This addition will allow users to modify their own ldap password
+# required for passwd to work properly in the client
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: {0}to attrs=userPassword,shadowLastChange by self write by anonymous auth by dn="cn=ldapadm,dc=ldap1,dc=local" write by * none

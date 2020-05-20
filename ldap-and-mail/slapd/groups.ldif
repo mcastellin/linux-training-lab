@@ -1,0 +1,9 @@
+dn: cn=user1,ou=Group,dc=ldap1,dc=local
+objectClass: top
+objectClass: posixGroup
+gidNumber: 5000
+
+dn: cn=user2,ou=Group,dc=ldap1,dc=local
+objectClass: top
+objectClass: posixGroup
+gidNumber: 5001
