@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
   # Run the standard installation script. This is going to be the same for all servers
   config.vm.provision "shell", path: "scripts/install.sh", privileged: true
 
+  # ns1 can be used as primary name server in an authoritative NS configuration
   config.vm.define "ns1" do |ns1|
     ns1.vm.hostname = "ns1"
     ns1.vm.network "private_network", ip: "10.0.1.40"
@@ -36,6 +37,7 @@ Vagrant.configure("2") do |config|
     SHELL
   end
 
+  # ns2 can be used as secondary name server in an authoritative NS configuration
   config.vm.define "ns2" do |ns2|
     ns2.vm.hostname = "ns2"
     ns2.vm.network "private_network", ip: "10.0.1.41"
@@ -46,6 +48,7 @@ Vagrant.configure("2") do |config|
     SHELL
   end
 
+  # recns1 has been introduced to provide a separate server to use as recursive (caching) DNS server
   config.vm.define "recns1" do |recns1|
     recns1.vm.hostname = "recns1"
     recns1.vm.network "private_network", ip: "10.0.1.49"
