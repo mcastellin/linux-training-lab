@@ -109,6 +109,43 @@ Vagrant.configure("2") do |config|
     samba1.vm.provision "shell", "inline": <<-SHELL
       cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
     SHELL
+
+    # Additional disks added for the samba1 machine.
+    # The purpose of these disks here is to practice configuring a samba share over a RAID array for data redundancy.
+    samba1.vm.provider "virtualbox" do |vb|
+      unless File.exist?(".vagrant/samba1_disk2.vdi")
+        vb.customize ["storagectl", :id, "--name", "SCSI", "--add", "scsi"]
+      end
+      unless File.exist?(".vagrant/samba1_disk2.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/samba1_disk2.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
+      unless File.exist?(".vagrant/samba1_disk3.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/samba1_disk3.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
+      unless File.exist?(".vagrant/samba1_disk4.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/samba1_disk4.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
+
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 1,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/samba1_disk2.vdi"]
+
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 2,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/samba1_disk3.vdi"]
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 3,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/samba1_disk4.vdi"]
+    end
   end
 
   # Defines primary server to ssh into by default.
@@ -131,6 +168,15 @@ Vagrant.configure("2") do |config|
       unless File.exist?(".vagrant/client1_disk3.vdi")
         vb.customize ["createhd", "--filename", ".vagrant/client1_disk3.vdi", "--variant", "Fixed", "--size", 10 * 1024]
       end
+      unless File.exist?(".vagrant/client1_disk4.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/client1_disk4.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
+      unless File.exist?(".vagrant/client1_disk5.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/client1_disk5.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
+      unless File.exist?(".vagrant/client1_disk6.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/client1_disk6.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      end
 
       vb.customize ["storageattach", :id,
                     "--storagectl", "SCSI",
@@ -145,6 +191,24 @@ Vagrant.configure("2") do |config|
                     "--device", 0,
                     "--type", "hdd",
                     "--medium", ".vagrant/client1_disk3.vdi"]
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 3,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/client1_disk4.vdi"]
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 4,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/client1_disk5.vdi"]
+      vb.customize ["storageattach", :id,
+                    "--storagectl", "SCSI",
+                    "--port", 5,
+                    "--device", 0,
+                    "--type", "hdd",
+                    "--medium", ".vagrant/client1_disk6.vdi"]
     end
   end
 end
