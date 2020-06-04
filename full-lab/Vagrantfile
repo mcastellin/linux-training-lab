@@ -26,9 +26,15 @@ Vagrant.configure("2") do |config|
   # Run the standard installation script. This is going to be the same for all servers
   config.vm.provision "shell", path: "scripts/install.sh", privileged: true
 
+  # Uncomment the line below to also attach the servers to the bridged network. 
+  # Be aware that when running the `vagrant up` or `vagrant reload` commands
+  # you'll need to manually select which host interface to use for the bridged interface.
+  #
+  # config.vm.network "public_network"
+
   # ns1 can be used as primary name server in an authoritative NS configuration
   config.vm.define "ns1" do |ns1|
-    ns1.vm.hostname = "ns1"
+    ns1.vm.hostname = "ns-node-1"
     ns1.vm.network "private_network", ip: "10.0.1.40"
 
     ns1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -39,7 +45,7 @@ Vagrant.configure("2") do |config|
 
   # ns2 can be used as secondary name server in an authoritative NS configuration
   config.vm.define "ns2" do |ns2|
-    ns2.vm.hostname = "ns2"
+    ns2.vm.hostname = "ns-node-2"
     ns2.vm.network "private_network", ip: "10.0.1.41"
 
     ns2.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -50,7 +56,7 @@ Vagrant.configure("2") do |config|
 
   # recns1 has been introduced to provide a separate server to use as recursive (caching) DNS server
   config.vm.define "recns1" do |recns1|
-    recns1.vm.hostname = "recns1"
+    recns1.vm.hostname = "ns-node-rec"
     recns1.vm.network "private_network", ip: "10.0.1.49"
 
     recns1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -60,7 +66,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "proxy1" do |proxy1|
-    proxy1.vm.hostname = "proxy1"
+    proxy1.vm.hostname = "proxy-node-1"
     proxy1.vm.network "private_network", ip: "10.0.1.60"
 
     proxy1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -70,7 +76,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "mail1" do |mail1|
-    mail1.vm.hostname = "mail1"
+    mail1.vm.hostname = "mail-node-1"
     mail1.vm.network "private_network", ip: "10.0.1.50"
 
     mail1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -80,7 +86,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "apache1" do |apache1|
-    apache1.vm.hostname = "apache1"
+    apache1.vm.hostname = "apache-node-1"
     apache1.vm.network "private_network", ip: "10.0.1.30"
 
     apache1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
@@ -101,7 +107,7 @@ Vagrant.configure("2") do |config|
 
   # Server machine to host samba share
   config.vm.define "samba1" do |samba1|
-    samba1.vm.hostname = "samba1"
+    samba1.vm.hostname = "samba-node-1"
     samba1.vm.network "private_network", ip: "10.0.1.20"
 
     samba1.vm.provision "shell", path: "scripts/install.sh", privileged: true
@@ -150,32 +156,32 @@ Vagrant.configure("2") do |config|
 
   # Defines primary server to ssh into by default.
   # When using the lab this is the main server to connect to perform administrative tasks
-  config.vm.define "client1", primary: true do |client1|
-    client1.vm.hostname = "client1"
-    client1.vm.network "private_network", ip: "10.0.1.11"
+  config.vm.define "node1", primary: true do |node1|
+    node1.vm.hostname = "node-1"
+    node1.vm.network "private_network", ip: "10.0.1.11"
 
-    client1.vm.provision "shell", path: "scripts/install.sh", privileged: true
-    client1.vm.provision "file", source: "~/.ssh/vagrant_rsa", destination: "~/.ssh/id_rsa"
-    client1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
+    node1.vm.provision "shell", path: "scripts/install.sh", privileged: true
+    node1.vm.provision "file", source: "~/.ssh/vagrant_rsa", destination: "~/.ssh/id_rsa"
+    node1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
 
-    client1.vm.provider "virtualbox" do |vb|
-      unless File.exist?(".vagrant/client1_disk2.vdi")
+    node1.vm.provider "virtualbox" do |vb|
+      unless File.exist?(".vagrant/node1_disk2.vdi")
         vb.customize ["storagectl", :id, "--name", "SCSI", "--add", "scsi"]
       end
-      unless File.exist?(".vagrant/client1_disk2.vdi")
-        vb.customize ["createhd", "--filename", ".vagrant/client1_disk2.vdi", "--variant", "Fixed", "--size", 5 * 1024]
+      unless File.exist?(".vagrant/node1_disk2.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/node1_disk2.vdi", "--variant", "Fixed", "--size", 5 * 1024]
       end
-      unless File.exist?(".vagrant/client1_disk3.vdi")
-        vb.customize ["createhd", "--filename", ".vagrant/client1_disk3.vdi", "--variant", "Fixed", "--size", 10 * 1024]
+      unless File.exist?(".vagrant/node1_disk3.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/node1_disk3.vdi", "--variant", "Fixed", "--size", 10 * 1024]
       end
-      unless File.exist?(".vagrant/client1_disk4.vdi")
-        vb.customize ["createhd", "--filename", ".vagrant/client1_disk4.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      unless File.exist?(".vagrant/node1_disk4.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/node1_disk4.vdi", "--variant", "Fixed", "--size", 2 * 1024]
       end
-      unless File.exist?(".vagrant/client1_disk5.vdi")
-        vb.customize ["createhd", "--filename", ".vagrant/client1_disk5.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      unless File.exist?(".vagrant/node1_disk5.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/node1_disk5.vdi", "--variant", "Fixed", "--size", 2 * 1024]
       end
-      unless File.exist?(".vagrant/client1_disk6.vdi")
-        vb.customize ["createhd", "--filename", ".vagrant/client1_disk6.vdi", "--variant", "Fixed", "--size", 2 * 1024]
+      unless File.exist?(".vagrant/node1_disk6.vdi")
+        vb.customize ["createhd", "--filename", ".vagrant/node1_disk6.vdi", "--variant", "Fixed", "--size", 2 * 1024]
       end
 
       vb.customize ["storageattach", :id,
@@ -183,32 +189,32 @@ Vagrant.configure("2") do |config|
                     "--port", 1,
                     "--device", 0,
                     "--type", "hdd",
-                    "--medium", ".vagrant/client1_disk2.vdi"]
+                    "--medium", ".vagrant/node1_disk2.vdi"]
 
       vb.customize ["storageattach", :id,
                     "--storagectl", "SCSI",
                     "--port", 2,
                     "--device", 0,
                     "--type", "hdd",
-                    "--medium", ".vagrant/client1_disk3.vdi"]
+                    "--medium", ".vagrant/node1_disk3.vdi"]
       vb.customize ["storageattach", :id,
                     "--storagectl", "SCSI",
                     "--port", 3,
                     "--device", 0,
                     "--type", "hdd",
-                    "--medium", ".vagrant/client1_disk4.vdi"]
+                    "--medium", ".vagrant/node1_disk4.vdi"]
       vb.customize ["storageattach", :id,
                     "--storagectl", "SCSI",
                     "--port", 4,
                     "--device", 0,
                     "--type", "hdd",
-                    "--medium", ".vagrant/client1_disk5.vdi"]
+                    "--medium", ".vagrant/node1_disk5.vdi"]
       vb.customize ["storageattach", :id,
                     "--storagectl", "SCSI",
                     "--port", 5,
                     "--device", 0,
                     "--type", "hdd",
-                    "--medium", ".vagrant/client1_disk6.vdi"]
+                    "--medium", ".vagrant/node1_disk6.vdi"]
     end
   end
 end
