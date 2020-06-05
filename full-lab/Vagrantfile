@@ -25,6 +25,12 @@ Vagrant.configure("2") do |config|
 
   # Run the standard installation script. This is going to be the same for all servers
   config.vm.provision "shell", path: "scripts/install.sh", privileged: true
+  config.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
+  config.vm.provision "shell", inline: <<-SHELL
+    mkdir -p /home/vagrant/.ssh /root/.ssh
+    cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+    cat /home/vagrant/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+    SHELL
 
   # Uncomment the line below to also attach the servers to the bridged network. 
   # Be aware that when running the `vagrant up` or `vagrant reload` commands
@@ -36,62 +42,35 @@ Vagrant.configure("2") do |config|
   config.vm.define "ns1" do |ns1|
     ns1.vm.hostname = "ns-node-1"
     ns1.vm.network "private_network", ip: "10.0.1.40"
-
-    ns1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    ns1.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
   end
 
   # ns2 can be used as secondary name server in an authoritative NS configuration
   config.vm.define "ns2" do |ns2|
     ns2.vm.hostname = "ns-node-2"
     ns2.vm.network "private_network", ip: "10.0.1.41"
-
-    ns2.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    ns2.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
   end
 
   # recns1 has been introduced to provide a separate server to use as recursive (caching) DNS server
   config.vm.define "recns1" do |recns1|
     recns1.vm.hostname = "ns-node-rec"
     recns1.vm.network "private_network", ip: "10.0.1.49"
-
-    recns1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    recns1.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
   end
 
   config.vm.define "proxy1" do |proxy1|
     proxy1.vm.hostname = "proxy-node-1"
     proxy1.vm.network "private_network", ip: "10.0.1.60"
-
-    proxy1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    proxy1.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
   end
 
   config.vm.define "mail1" do |mail1|
     mail1.vm.hostname = "mail-node-1"
     mail1.vm.network "private_network", ip: "10.0.1.50"
-
-    mail1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    mail1.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
   end
 
   config.vm.define "apache1" do |apache1|
     apache1.vm.hostname = "apache-node-1"
     apache1.vm.network "private_network", ip: "10.0.1.30"
 
-    apache1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
     apache1.vm.provision "shell", inline: <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
       yum install -q -y httpd
       systemctl enable httpd --now 2>&1
       echo "This content is from the apache1 server! Congratulations!" > /var/www/html/index.html
@@ -109,12 +88,6 @@ Vagrant.configure("2") do |config|
   config.vm.define "samba1" do |samba1|
     samba1.vm.hostname = "samba-node-1"
     samba1.vm.network "private_network", ip: "10.0.1.20"
-
-    samba1.vm.provision "shell", path: "scripts/install.sh", privileged: true
-    samba1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-    samba1.vm.provision "shell", "inline": <<-SHELL
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-    SHELL
 
     # Additional disks added for the samba1 machine.
     # The purpose of these disks here is to practice configuring a samba share over a RAID array for data redundancy.
@@ -160,9 +133,10 @@ Vagrant.configure("2") do |config|
     node1.vm.hostname = "node-1"
     node1.vm.network "private_network", ip: "10.0.1.11"
 
-    node1.vm.provision "shell", path: "scripts/install.sh", privileged: true
-    node1.vm.provision "file", source: "~/.ssh/vagrant_rsa", destination: "~/.ssh/id_rsa"
-    node1.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/id_rsa.pub"
+    node1.vm.provision "file", source: "~/.ssh/vagrant_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+    node1.vm.provision "shell", inline: <<-SHELL
+      cp /home/vagrant/.ssh/id_rsa /root/.ssh/id_rsa
+    SHELL
 
     node1.vm.provider "virtualbox" do |vb|
       unless File.exist?(".vagrant/node1_disk2.vdi")
