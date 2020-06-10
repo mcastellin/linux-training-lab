@@ -1,4 +1,4 @@
-# Linux Traning Labs
+# Linux Training Labs
 Vagrant scripts to create multi-node Linux training labs
 
 # Using the Labs
